@@ -1,20 +1,15 @@
-// Author: Daison Carino
+// Author: Daison Cariño
 // You may copy this file and place it inside
 // your forked github.com/lucidfy/lucid,
-// under this folder path/app/commands
+// under this path "app/commands/"
 //
-// Go  to registrar/commands and copy paste this
-/*
-	{
-		Name:    "crawlgma",
-		Aliases: []string{},
-		Usage:   "",
-		Action:  commands.CrawlGma,
-	},
-*/
+// Go  to registrar/commands.go and inject this
+// commands.CrawlGma().Command,
 //
 // Then execute the bash command `run`  under your lucid folder
-//     ./run crawlgma
+//     ./run crawlgma --procedure batch --counter 100
+//     ./run crawlgma --procedure hourly --counter 50
+
 package commands
 
 import (
@@ -33,7 +28,34 @@ import (
 
 const FOLDER = "./../election-2022-data-transparency/"
 
-func CrawlGma(c *cli.Context) error {
+type CrawlGmaCommand struct {
+	Command *cli.Command
+}
+
+func CrawlGma() *CrawlGmaCommand {
+	var cc CrawlGmaCommand
+	cc.Command = &cli.Command{
+		Name:    "crawlgma",
+		Aliases: []string{},
+		Usage:   "",
+		Action:  cc.Handle,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "procedure",
+				Value: "batch",
+				Usage: `Provider either "batch" or "hourly"`,
+			},
+			&cli.IntFlag{
+				Name:  "counter",
+				Value: 100,
+				Usage: `Provide the loop counter, ie "100", better to lessen it to avoid request leaks!`,
+			},
+		},
+	}
+	return &cc
+}
+
+func (cc *CrawlGmaCommand) Handle(c *cli.Context) error {
 	procedure := c.String("procedure")
 	maxCounter := c.Int("counter")
 
